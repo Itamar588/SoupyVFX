@@ -31,10 +31,16 @@ public class MagicCircle {
 
     public void addComponent(MagicCircleComponent component) { this.components.add(component); }
     public List<MagicCircleComponent> getComponents() { return components; }
+
     public UUID getId() { return id; }
     public Vec3d getPos() { return pos; }
     public float getPitch() { return pitch; }
     public float getYaw() { return yaw; }
     public float getRoll() { return roll; }
     public int getColor() { return color; }
+
+    // Fixed: Added missing getters for API sync
+    public float getScale() { return scale; }
+    public float getSpinSpeed() { return spinSpeed; }
+    public float getPulseIntensity() { return pulseIntensity; }
 }

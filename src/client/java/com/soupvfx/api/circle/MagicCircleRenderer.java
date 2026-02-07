@@ -1,7 +1,6 @@
-package com.soupvfx.api;
+package com.soupvfx.api.circle;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.soupvfx.api.circle.*;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
