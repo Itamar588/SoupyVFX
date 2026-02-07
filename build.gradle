@@ -44,10 +44,17 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
+// configure the maven publication
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            from components.java
+            // This ensures BOTH main and client code are included in the published artifact
+            artifact(remapJar)
+
+            // This ensures your source code is also published so you can see it in SoupyWeapons
+            artifact(sourcesJar) {
+                builtBy remapSourcesJar
+            }
         }
     }
 }
