@@ -6,7 +6,6 @@ import java.util.UUID;
 
 public class CircleNetworking {
     public static void initClient() {
-        // Handle Spawning
         ClientPlayNetworking.registerGlobalReceiver(MagicCircleAPI.SPAWN_PACKET, (client, handler, buf, responseSender) -> {
             UUID id = buf.readUuid();
             Vec3d pos = new Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble());
@@ -19,7 +18,6 @@ public class CircleNetworking {
             float pulse = buf.readFloat();
 
             MagicCircle circle = new MagicCircle(id, pos, color, pitch, yaw, roll, scale, spin, pulse);
-
             int compCount = buf.readInt();
             for (int i = 0; i < compCount; i++) {
                 MagicCircleComponent.ComponentType type = buf.readEnumConstant(MagicCircleComponent.ComponentType.class);
@@ -30,11 +28,27 @@ public class CircleNetworking {
                     case RUNE_RING -> circle.addComponent(new RuneRingData(buf.readFloat(), buf.readFloat(), buf.readInt(), buf.readFloat()));
                 }
             }
-
             client.execute(() -> MagicCircleRegistry.register(id, circle));
         });
 
-        // NEW: Handle Removal
+        ClientPlayNetworking.registerGlobalReceiver(MagicCircleAPI.UPDATE_PACKET, (client, handler, buf, responseSender) -> {
+            UUID id = buf.readUuid();
+            int color = buf.readInt();
+            float scale = buf.readFloat();
+            float spin = buf.readFloat();
+            float pulse = buf.readFloat();
+
+            client.execute(() -> {
+                MagicCircle c = MagicCircleRegistry.getCircle(id);
+                if (c != null) {
+                    c.setColor(color);
+                    c.setScale(scale);
+                    c.setSpinSpeed(spin);
+                    c.setPulseIntensity(pulse);
+                }
+            });
+        });
+
         ClientPlayNetworking.registerGlobalReceiver(MagicCircleAPI.REMOVE_PACKET, (client, handler, buf, responseSender) -> {
             UUID id = buf.readUuid();
             client.execute(() -> MagicCircleRegistry.remove(id));

@@ -6,15 +6,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MagicCircleRegistry {
     private static final Map<UUID, MagicCircle> CIRCLES = new ConcurrentHashMap<>();
 
-    public static void register(UUID id, MagicCircle circle) {
-        CIRCLES.put(id, circle);
-    }
-
-    public static void remove(UUID id) {
-        CIRCLES.remove(id);
-    }
-
-    public static Collection<MagicCircle> getCircles() {
-        return CIRCLES.values();
-    }
+    public static void register(UUID id, MagicCircle circle) { CIRCLES.put(id, circle); }
+    public static void remove(UUID id) { CIRCLES.remove(id); }
+    public static MagicCircle getCircle(UUID id) { return CIRCLES.get(id); }
+    public static Collection<MagicCircle> getCircles() { return CIRCLES.values(); }
 }

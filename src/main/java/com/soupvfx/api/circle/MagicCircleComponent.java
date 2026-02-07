@@ -7,6 +7,6 @@ public interface MagicCircleComponent {
     ComponentType getType();
 
     enum ComponentType {
-        HEAVY_RING, POLYGON, STAR, RUNE_RING;
+        HEAVY_RING, POLYGON, STAR, RUNE_RING
     }
 }

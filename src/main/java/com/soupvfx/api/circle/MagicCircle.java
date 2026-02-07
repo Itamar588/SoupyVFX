@@ -29,6 +29,13 @@ public class MagicCircle {
         return this.scale + ((float) Math.sin(animationTimer) * pulseIntensity);
     }
 
+    // Setters for Real-Time Updates
+    public void setColor(int color) { this.color = color; }
+    public void setScale(float scale) { this.scale = scale; }
+    public void setSpinSpeed(float spinSpeed) { this.spinSpeed = spinSpeed; }
+    public void setPulseIntensity(float pulseIntensity) { this.pulseIntensity = pulseIntensity; }
+    public void setPos(Vec3d pos) { this.pos = pos; }
+
     public void addComponent(MagicCircleComponent component) { this.components.add(component); }
     public List<MagicCircleComponent> getComponents() { return components; }
 
@@ -38,8 +45,6 @@ public class MagicCircle {
     public float getYaw() { return yaw; }
     public float getRoll() { return roll; }
     public int getColor() { return color; }
-
-    // Fixed: Added missing getters for API sync
     public float getScale() { return scale; }
     public float getSpinSpeed() { return spinSpeed; }
     public float getPulseIntensity() { return pulseIntensity; }

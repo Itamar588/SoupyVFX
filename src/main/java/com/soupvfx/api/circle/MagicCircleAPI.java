@@ -13,16 +13,35 @@ import java.util.UUID;
 public class MagicCircleAPI {
     public static final Identifier SPAWN_PACKET = new Identifier("soupyvfx", "spawn_circle");
     public static final Identifier REMOVE_PACKET = new Identifier("soupyvfx", "remove_circle");
+    public static final Identifier UPDATE_PACKET = new Identifier("soupyvfx", "update_circle");
 
     public static MagicCircle drawMagicCircle(ServerWorld world, Vec3d pos, int color, float p, float y, float r, float s, float spin, float pulse) {
         UUID id = UUID.randomUUID();
         MagicCircle circle = new MagicCircle(id, pos, color, p, y, r, s, spin, pulse);
         MagicCircleRegistry.register(id, circle);
-
-        // Auto-sync: No more manual calls needed in Main
         syncToAll(world, circle);
-
         return circle;
+    }
+
+    public static void updateCircle(ServerWorld world, UUID id, int color, float scale, float spin, float pulse) {
+        MagicCircle circle = MagicCircleRegistry.getCircle(id);
+        if (circle == null) return;
+
+        circle.setColor(color);
+        circle.setScale(scale);
+        circle.setSpinSpeed(spin);
+        circle.setPulseIntensity(pulse);
+
+        PacketByteBuf buf = PacketByteBufs.create();
+        buf.writeUuid(id);
+        buf.writeInt(color);
+        buf.writeFloat(scale);
+        buf.writeFloat(spin);
+        buf.writeFloat(pulse);
+
+        for (ServerPlayerEntity player : PlayerLookup.world(world)) {
+            ServerPlayNetworking.send(player, UPDATE_PACKET, buf);
+        }
     }
 
     public static void syncToAll(ServerWorld world, MagicCircle circle) {
@@ -55,10 +74,8 @@ public class MagicCircleAPI {
 
     public static void removeCircle(ServerWorld world, UUID circleId) {
         MagicCircleRegistry.remove(circleId);
-
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeUuid(circleId);
-
         for (ServerPlayerEntity player : PlayerLookup.world(world)) {
             ServerPlayNetworking.send(player, REMOVE_PACKET, buf);
         }
