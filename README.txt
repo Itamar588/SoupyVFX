@@ -15,10 +15,10 @@ repositories {
 
 dependencies {
     // API for development
-    modImplementation "com.github.Itamar588:SoupyVFX:1.0.1"
+    modImplementation "com.github.Itamar588:SoupyVFX:1.0.4"
 
     // Shadowing the library into the final JAR
-    include "com.github.Itamar588:SoupyVFX:1.0.1"
+    include "com.github.Itamar588:SoupyVFX:1.0.4"
 }
 
 
