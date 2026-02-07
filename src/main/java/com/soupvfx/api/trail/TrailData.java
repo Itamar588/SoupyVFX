@@ -8,8 +8,8 @@ public class TrailData {
     private final LinkedList<TrailPoint> points = new LinkedList<>();
     private final int maxPoints;
     private final long lifetimeMs;
-    private final float width;
-    private final int color;
+    private float width; // Removed final
+    private int color;   // Removed final
     private boolean active = true;
 
     public TrailData(int maxPoints, long lifetimeMs, float width, int color) {
@@ -30,9 +30,14 @@ public class TrailData {
         points.removeIf(p -> (now - p.timestamp()) > lifetimeMs);
     }
 
+    public void setWidth(float width) { this.width = width; }
+    public void setColor(int color) { this.color = color; }
     public void setInactive() { this.active = false; }
+
     public boolean isExpired() { return !active && points.isEmpty(); }
     public List<TrailPoint> getPoints() { return points; }
     public float getWidth() { return width; }
     public int getColor() { return color; }
+    public int getMaxPoints() { return maxPoints; }
+    public long getLifetime() { return lifetimeMs; }
 }

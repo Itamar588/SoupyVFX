@@ -2,18 +2,12 @@ package com.soupvfx.api.trail;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.Identifier;
-
 import java.util.UUID;
 
 public class TrailNetworking {
-    // MUST MATCH TrailAPI exactly
-    public static final Identifier TRAIL_PACKET = new Identifier("soupyvfx", "trail_sync");
-
     public static void initClient() {
-        ClientPlayNetworking.registerGlobalReceiver(TRAIL_PACKET, (client, handler, buf, responseSender) -> {
+        ClientPlayNetworking.registerGlobalReceiver(TrailAPI.TRAIL_PACKET, (client, handler, buf, responseSender) -> {
             boolean start = buf.readBoolean();
             UUID id = buf.readUuid();
             if (start) {
@@ -27,7 +21,19 @@ public class TrailNetworking {
             }
         });
 
-        // Keep this TICK logic, but REMOVE the addPoint call from the Renderer
+        ClientPlayNetworking.registerGlobalReceiver(TrailAPI.UPDATE_PACKET, (client, handler, buf, responseSender) -> {
+            UUID id = buf.readUuid();
+            float width = buf.readFloat();
+            int color = buf.readInt();
+            client.execute(() -> {
+                TrailData trail = TrailRegistry.getTrail(id);
+                if (trail != null) {
+                    trail.setWidth(width);
+                    trail.setColor(color);
+                }
+            });
+        });
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.world == null) return;
             TrailRegistry.getActiveEntityTrails().forEach((uuid, trail) -> {

@@ -13,20 +13,38 @@ import java.util.UUID;
 public class PillarAPI {
     public static final Identifier SPAWN_PACKET = new Identifier("soupyvfx", "spawn_pillar");
     public static final Identifier REMOVE_PACKET = new Identifier("soupyvfx", "remove_pillar");
+    public static final Identifier UPDATE_PACKET = new Identifier("soupyvfx", "update_pillar");
 
-    public static void spawnPillar(ServerWorld world, Vec3d pos, float yaw, float pitch, float length, float radius, int sides, int color) {
+    public static UUID spawnPillar(ServerWorld world, Vec3d pos, float yaw, float pitch, float length, float radius, int sides, int color) {
         UUID id = UUID.randomUUID();
         PillarData data = new PillarData(id, pos, yaw, pitch, length, radius, sides, color);
-
         PillarRegistry.register(id, data);
 
-        // Broadcast to everyone currently online
         for (ServerPlayerEntity player : PlayerLookup.world(world)) {
             syncToPlayer(player, data);
         }
+        return id;
     }
 
-    // NEW: For syncing specific players (Join) or broadcasting spawns
+    public static void updatePillar(ServerWorld world, UUID id, float length, float radius, int color) {
+        PillarData pillar = PillarRegistry.getPillar(id);
+        if (pillar == null) return;
+
+        pillar.setLength(length);
+        pillar.setRadius(radius);
+        pillar.setColor(color);
+
+        PacketByteBuf buf = PacketByteBufs.create();
+        buf.writeUuid(id);
+        buf.writeFloat(length);
+        buf.writeFloat(radius);
+        buf.writeInt(color);
+
+        for (ServerPlayerEntity player : PlayerLookup.world(world)) {
+            ServerPlayNetworking.send(player, UPDATE_PACKET, buf);
+        }
+    }
+
     public static void syncToPlayer(ServerPlayerEntity player, PillarData data) {
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeUuid(data.id());
@@ -42,13 +60,10 @@ public class PillarAPI {
         ServerPlayNetworking.send(player, SPAWN_PACKET, buf);
     }
 
-    // NEW: The Removal method
     public static void removePillar(ServerWorld world, UUID pillarId) {
-        PillarRegistry.remove(pillarId); // Server cleanup
-
+        PillarRegistry.remove(pillarId);
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeUuid(pillarId);
-
         for (ServerPlayerEntity player : PlayerLookup.world(world)) {
             ServerPlayNetworking.send(player, REMOVE_PACKET, buf);
         }

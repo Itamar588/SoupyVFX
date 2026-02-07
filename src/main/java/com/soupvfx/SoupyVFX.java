@@ -90,7 +90,7 @@ public class SoupyVFX implements ModInitializer {
 
         MagicCircle c4 = MagicCircleAPI.drawMagicCircle(world, new Vec3d(15, 100, 0), red, p, 0, 0, s, 0.5f, 0.2f);
         c4.addComponent(new HeavyRingData(1.0f, 0.9f, 0.02f, 32));
-        c4.addComponent(new PolygonData(0.85f, 0.04f, 4, true));
-        c4.addComponent(new StarData(0.8f, 0.05f, 5));
+        c4.addComponent(new PolygonData(0.85f, 0.04f, 3, true));
+        c4.addComponent(new StarData(0.1f, 0.05f, 6));
     }
 }

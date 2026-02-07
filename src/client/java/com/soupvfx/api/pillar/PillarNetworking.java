@@ -6,7 +6,6 @@ import java.util.UUID;
 
 public class PillarNetworking {
     public static void initClient() {
-        // Handle Spawning
         ClientPlayNetworking.registerGlobalReceiver(PillarAPI.SPAWN_PACKET, (client, handler, buf, responseSender) -> {
             UUID id = buf.readUuid();
             Vec3d pos = new Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble());
@@ -21,7 +20,21 @@ public class PillarNetworking {
             client.execute(() -> PillarRegistry.register(id, data));
         });
 
-        // NEW: Handle Removal
+        ClientPlayNetworking.registerGlobalReceiver(PillarAPI.UPDATE_PACKET, (client, handler, buf, responseSender) -> {
+            UUID id = buf.readUuid();
+            float length = buf.readFloat();
+            float radius = buf.readFloat();
+            int color = buf.readInt();
+            client.execute(() -> {
+                PillarData pillar = PillarRegistry.getPillar(id);
+                if (pillar != null) {
+                    pillar.setLength(length);
+                    pillar.setRadius(radius);
+                    pillar.setColor(color);
+                }
+            });
+        });
+
         ClientPlayNetworking.registerGlobalReceiver(PillarAPI.REMOVE_PACKET, (client, handler, buf, responseSender) -> {
             UUID id = buf.readUuid();
             client.execute(() -> PillarRegistry.remove(id));

@@ -16,6 +16,19 @@ public class SphereNetworking {
             client.execute(() -> SphereRegistry.register(id, new SphereData(id, pos, radius, lineWidth, subs, color)));
         });
 
+        ClientPlayNetworking.registerGlobalReceiver(SphereAPI.UPDATE_PACKET, (client, handler, buf, responseSender) -> {
+            UUID id = buf.readUuid();
+            float radius = buf.readFloat();
+            int color = buf.readInt();
+            client.execute(() -> {
+                SphereData sphere = SphereRegistry.getSphere(id);
+                if (sphere != null) {
+                    sphere.setRadius(radius);
+                    sphere.setColor(color);
+                }
+            });
+        });
+
         ClientPlayNetworking.registerGlobalReceiver(SphereAPI.REMOVE_PACKET, (client, handler, buf, responseSender) -> {
             UUID id = buf.readUuid();
             client.execute(() -> SphereRegistry.remove(id));
