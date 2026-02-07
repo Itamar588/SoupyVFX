@@ -4,6 +4,9 @@ import com.soupvfx.api.circle.*;
 import com.soupvfx.api.pillar.PillarAPI;
 import com.soupvfx.api.pillar.PillarData;
 import com.soupvfx.api.pillar.PillarRegistry;
+import com.soupvfx.api.sphere.SphereAPI;
+import com.soupvfx.api.sphere.SphereData;
+import com.soupvfx.api.sphere.SphereRegistry;
 import com.soupvfx.api.trail.TrailAPI;
 import com.soupvfx.api.trail.TrailData;
 import com.soupvfx.api.trail.TrailRegistry;
@@ -21,7 +24,7 @@ public class SoupyVFX implements ModInitializer {
     public void onInitialize() {
         System.out.println("[SoupyVFX] INITIALIZING MAIN MOD...");
 
-        // Start trail when entity loads and register it on server
+        // Start trail when entity loads
         ServerEntityEvents.ENTITY_LOAD.register((entity, world) -> {
             if (entity instanceof ServerPlayerEntity player) {
                 TrailData data = new TrailData(500, 2000, 0.4f, 0x00FFFF);
@@ -45,9 +48,15 @@ public class SoupyVFX implements ModInitializer {
                     TrailAPI.syncToPlayer(joiningPlayer, uuid, data);
                 }
             });
+
             // 3. Sync Existing Pillars
             for (PillarData pillar : PillarRegistry.getPillars()) {
                 PillarAPI.syncToPlayer(joiningPlayer, pillar);
+            }
+
+            // 4. Sync Existing Spheres
+            for (SphereData sphere : SphereRegistry.getSpheres()) {
+                SphereAPI.syncToPlayer(joiningPlayer, sphere);
             }
         });
 
@@ -60,26 +69,28 @@ public class SoupyVFX implements ModInitializer {
     private void spawnShowcase(ServerWorld world) {
         float p = 90f; float s = 2.0f;
         int teal = 0x00FFFF; int gold = 0xFFD700; int magenta = 0xFF00FF; int red = 0xFF5555;
-        // Spawn a hexagonal prism (6 sides) pointing straight up, 5 blocks long
+
+        // 1. THE PRISM
         PillarAPI.spawnPillar(world, new Vec3d(20, 100, 0), 0, 0, 5f, 1.5f, 6, 0x00FF00);
-        // 1. THE HEAVY RING - Auto-syncs on creation
+
+        // 2. THE SPHERE (20-Sided Icosahedron)
+        // world, pos, radius, lineWidth, subdivisions, color
+        SphereAPI.spawnSphere(world, new Vec3d(30, 100, 0), 2.5f, 0.08f, 0, 0xFFFFFF);
+
+        // 3. THE MAGIC CIRCLES
         MagicCircle c1 = MagicCircleAPI.drawMagicCircle(world, new Vec3d(0, 100, 0), teal, p, 0, 0, s, 1.0f, 0.05f);
         c1.addComponent(new HeavyRingData(1.0f, 0.7f, 0.04f, 18));
 
-        // 2. THE LATTICE OCTAGON - Auto-syncs on creation
         MagicCircle c2 = MagicCircleAPI.drawMagicCircle(world, new Vec3d(5, 100, 0), magenta, p, 0, 0, s, 0.8f, 0.1f);
         c2.addComponent(new PolygonData(1.0f, 0.06f, 8, true));
 
-        // 3. THE GOLD CIRCLE - Auto-syncs on creation
         MagicCircle c3 = MagicCircleAPI.drawMagicCircle(world, new Vec3d(10, 100, 0), gold, p, 0, 0, s, -1.2f, 0.02f);
-        c3.addComponent(new PolygonData(1.0f, 0.03f, 6, false));
+        c3.addComponent(new RuneRingData(1.0f, 0.03f, 6, 4));
         c3.addComponent(new StarData(1.0f, 0.03f, 6));
-        c3.addComponent(new RuneRingData(0.6f, 0.12f, 16, 0.7f));
 
-        // 4. THE ULTIMATE ARRAY - Auto-syncs on creation
         MagicCircle c4 = MagicCircleAPI.drawMagicCircle(world, new Vec3d(15, 100, 0), red, p, 0, 0, s, 0.5f, 0.2f);
         c4.addComponent(new HeavyRingData(1.0f, 0.9f, 0.02f, 32));
         c4.addComponent(new PolygonData(0.85f, 0.04f, 4, true));
-        c4.addComponent(new StarData(0.6f, 0.02f, 5));
+        c4.addComponent(new StarData(0.8f, 0.05f, 5));
     }
 }

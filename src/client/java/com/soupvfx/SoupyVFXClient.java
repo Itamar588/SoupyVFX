@@ -4,6 +4,8 @@ import com.soupvfx.api.circle.CircleNetworking;
 import com.soupvfx.api.circle.MagicCircleRenderer;
 import com.soupvfx.api.pillar.PillarNetworking;
 import com.soupvfx.api.pillar.PillarRenderer;
+import com.soupvfx.api.sphere.SphereNetworking;
+import com.soupvfx.api.sphere.SphereRenderer;
 import com.soupvfx.api.trail.TrailRenderer;
 import com.soupvfx.api.trail.TrailNetworking;
 import net.fabricmc.api.ClientModInitializer;
@@ -22,5 +24,9 @@ public class SoupyVFXClient implements ClientModInitializer {
         //init Pillars
         PillarRenderer.register();
         PillarNetworking.initClient();
+
+        //init Spheres
+        SphereRenderer.register();
+        SphereNetworking.initClient();
     }
 }
