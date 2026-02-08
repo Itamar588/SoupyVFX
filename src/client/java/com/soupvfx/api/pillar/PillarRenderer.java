@@ -23,31 +23,29 @@ public class PillarRenderer {
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
 
-        // Standard setup for solid geometry
-        RenderSystem.disableBlend(); // We don't want blending for pure opaque
+        // FIXED: Enable blending and setup proper depth states to prevent state leakage
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-
         RenderSystem.enableDepthTest();
-        RenderSystem.depthMask(true); // REQUIRED for opaque
-        RenderSystem.disableCull();   // Ensures both sides of the faces are visible
+        RenderSystem.depthMask(true);
+        RenderSystem.disableCull();
 
         for (PillarData p : pillars) {
             matrices.push();
-
             Vec3d relPos = p.pos().subtract(cameraPos);
             matrices.translate(relPos.x, relPos.y, relPos.z);
 
-            // Rotation logic
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-p.yaw()));
+            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(p.yaw()));
             matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(p.pitch()));
 
-            Matrix4f m = matrices.peek().getPositionMatrix();
-            int c = p.color();
-            float r = (c >> 16 & 255) / 255f;
-            float g = (c >> 8 & 255) / 255f;
-            float bl = (c & 255) / 255f;
+            float r = (p.color() >> 16 & 0xFF) / 255.0f;
+            float g = (p.color() >> 8 & 0xFF) / 255.0f;
+            float bl = (p.color() & 0xFF) / 255.0f;
 
-            // 1. DRAW SIDES
+            Matrix4f m = matrices.peek().getPositionMatrix();
+
+            // 1. DRAW TUBE
             buffer.begin(VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR);
             for (int i = 0; i <= p.sides(); i++) {
                 float angle = (float) (i * 2 * Math.PI / p.sides());
@@ -59,30 +57,26 @@ public class PillarRenderer {
             }
             tessellator.draw();
 
-            // 2. DRAW BASE CAP (Height 0)
             drawCap(m, buffer, p, r, g, bl, 0);
-
-            // 3. DRAW TOP CAP (Height length)
             drawCap(m, buffer, p, r, g, bl, p.length());
 
             matrices.pop();
         }
 
-        // Cleanup: Return state to normal
+        // FIXED: Strict cleanup to restore vanilla rendering state
         RenderSystem.enableCull();
-        RenderSystem.enableBlend();
+        RenderSystem.depthMask(true);
+        RenderSystem.disableBlend();
     }
 
     private static void drawCap(Matrix4f m, BufferBuilder b, PillarData p, float r, float g, float bl, float height) {
         b.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
-        // Center vertex
         b.vertex(m, 0, height, 0).color(r, g, bl, 1.0f).next();
-
         for (int i = 0; i <= p.sides(); i++) {
             float angle = (float) (i * 2 * Math.PI / p.sides());
-            float x = (float) Math.cos(angle) * p.radius();
-            float z = (float) Math.sin(angle) * p.radius();
-            b.vertex(m, x, height, z).color(r, g, bl, 1.0f).next();
+            float dx = (float) Math.cos(angle) * p.radius();
+            float dz = (float) Math.sin(angle) * p.radius();
+            b.vertex(m, dx, height, dz).color(r, g, bl, 1.0f).next();
         }
         Tessellator.getInstance().draw();
     }
